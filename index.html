@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Diabetes Detection - Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Diabetes Detection System</h1>
+      <p class="subtitle">Fill patient data and click Predict</p>
+    </header>
+
+    {% if error %}
+      <div class="alert error">{{ error }}</div>
+    {% endif %}
+
+    <!-- Single Patient Prediction -->
+    <form action="/predict" method="post" class="form-card">
+      <div class="grid-2">
+        <label>Pregnancies <input name="Pregnancies" type="number" step="any" required></label>
+        <label>Glucose <input name="Glucose" type="number" step="any" required></label>
+        <label>Blood Pressure <input name="BloodPressure" type="number" step="any" required></label>
+        <label>Skin Thickness <input name="SkinThickness" type="number" step="any" required></label>
+        <label>Insulin <input name="Insulin" type="number" step="any" required></label>
+        <label>BMI <input name="BMI" type="number" step="any" required></label>
+        <label>Diabetes Pedigree Function <input name="DiabetesPedigreeFunction" type="number" step="any" required></label>
+        <label>Age <input name="Age" type="number" step="any" required></label>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" type="submit">Predict & View Report</button>
+        <!-- Alag pages ke liye correct links -->
+        
+      </div>
+    </form>
+  </div>
+</body>
+</html>
