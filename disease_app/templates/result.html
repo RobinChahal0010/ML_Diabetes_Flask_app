@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Diabetes Prediction Report</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Reset & Basics */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { 
+      background: linear-gradient(135deg, #6a11cb, #2575fc); 
+      min-height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: #fff;
+      padding: 40px 15px;
+    }
+
+    /* Container */
+    .report-container {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(18px);
+      padding: 40px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 1100px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      animation: fadeIn 1s ease-out;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      text-align: center;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+
+    h5 small {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.9rem;
+      color: #e0e0e0;
+    }
+
+    /* Card */
+    .card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 25px;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
+      animation: slideUp 0.8s ease-out;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      color: #fff;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    th {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    tr:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* Chart box */
+    .chart-box {
+      margin: 25px 0;
+      padding: 20px;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.08);
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.15);
+      animation: fadeIn 1.2s ease-out;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 8px;
+    }
+    .btn.primary {
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      color: #fff;
+      box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
+    }
+    .btn.primary:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 10px 20px rgba(255, 65, 108, 0.6);
+    }
+    .btn.success {
+      background: linear-gradient(45deg, #00b09b, #96c93d);
+      color: #fff;
+      box-shadow: 0 5px 15px rgba(0, 176, 155, 0.4);
+    }
+    .btn.success:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 10px 20px rgba(0, 176, 155, 0.6);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .report-container { padding: 25px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="report-container">
+    <h2>🩺 Diabetes Prediction Report</h2>
+    
+    <!-- Prediction Result -->
+    <h5 class="text-center">
+      Result: 
+      {% if result == "Diabetic" %}
+        <span style="color:#ff6b81; font-weight:700;">❌ Patient has Diabetes</span>
+      {% else %}
+        <span style="color:#2ecc71; font-weight:700;">✅ Patient is Healthy</span>
+      {% endif %}
+      <small>Risk Probability: {{ probability }}%</small>
+    </h5>
+
+    <!-- Patient Data Table -->
+    <div class="card">
+      <h4>📊 Patient Input Data</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f, v in pairs %}
+          <tr>
+            <td>{{ f }}</td>
+            <td>{{ v }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Charts -->
+    <div id="bmiChart" class="chart-box"></div>
+    <div id="glucoseChart" class="chart-box"></div>
+    <div id="gaugeChart" class="chart-box"></div>
+
+    <!-- Actions -->
+    <div class="text-center mt-4">
+      <a href="/" class="btn primary">⬅️ Go Back</a>
+      
+      <form action="/download_report" method="post" style="display:inline;">
+        {% for f, v in pairs %}
+          <input type="hidden" name="{{ f }}" value="{{ v }}">
+        {% endfor %}
+        <input type="hidden" name="result" value="{{ result }}">
+        <input type="hidden" name="probability" value="{{ probability }}">
+        <button class="btn success" type="submit">📥 Download PDF Report</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // BMI chart
+    var bmiData = [{
+      type: "bar",
+      x: [{{ bmi }}],
+      y: ["BMI"],
+      orientation: "h",
+      marker: { color: "orange" },
+      name: "Patient BMI"
+    },{
+      type: "bar",
+      x: [25],
+      y: ["BMI"],
+      orientation: "h",
+      marker: { color: "green" },
+      name: "Healthy Upper Limit"
+    }];
+    Plotly.newPlot('bmiChart', bmiData, {title: "BMI vs Normal Range", barmode: "group"});
+
+    // Glucose chart
+    var glucoseData = [{
+      type: "bar",
+      x: [{{ glucose }}],
+      y: ["Glucose"],
+      orientation: "h",
+      marker: { color: "red" },
+      name: "Patient Glucose"
+    },{
+      type: "bar",
+      x: [140],
+      y: ["Glucose"],
+      orientation: "h",
+      marker: { color: "green" },
+      name: "Healthy Upper Limit"
+    }];
+    Plotly.newPlot('glucoseChart', glucoseData, {title: "Glucose vs Normal Range", barmode: "group"});
+
+    // Gauge Risk
+    var gaugeData = [{
+      type: "indicator",
+      mode: "gauge+number",
+      value: {{ probability }},
+      title: { text: "Diabetes Risk (%)" },
+      gauge: {
+        axis: { range: [0, 100] },
+        bar: { color: "black" },
+        steps: [
+          { range: [0, 40], color: "lightgreen" },
+          { range: [40, 70], color: "yellow" },
+          { range: [70, 100], color: "red" }
+        ]
+      }
+    }];
+    Plotly.newPlot('gaugeChart', gaugeData);
+  </script>
+</body>
+</html>
